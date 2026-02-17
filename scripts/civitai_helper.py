@@ -93,6 +93,9 @@ def on_ui_tabs():
             sections.scan_models_section()
 
         with gr.Box(elem_classes="ch_box"):
+            sections.organize_models_section()
+
+        with gr.Box(elem_classes="ch_box"):
             sections.get_model_info_by_url_section()
 
         with gr.Box(elem_classes="ch_box"):
@@ -346,6 +349,16 @@ def on_ui_settings():
             gr.Checkbox,
             {"interactive": True},
             section=section)
+    )
+    shared.opts.add_option(
+        "ch_organize_exclude_paths",
+        shared.OptionInfo(
+            "",
+            "Organize Models: Exclude Folders (comma separated)",
+            gr.Textbox,
+            {"interactive": True},
+            section=section
+        )
     )
     if dynamic_args:
         shared.opts.add_option(

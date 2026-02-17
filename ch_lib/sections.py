@@ -8,6 +8,7 @@ from . import js_action_civitai
 from . import model_action_civitai
 from . import civitai
 from . import duplicate_check
+from . import organize
 from . import util
 
 model_types = list(model.folders.keys())
@@ -73,6 +74,51 @@ def scan_models_section():
     #     model.scan_civitai_info_image_meta,
     #     outputs=scan_model_log_md
     # )
+
+def organize_models_section():
+    """ Organize Models Section """
+    with gr.Column():
+        gr.Markdown("### Organize Models")
+        gr.Markdown("Moves models into subfolders named after their creator (requires .civitai.info).")
+        with gr.Row():
+            organize_model_types = gr.CheckboxGroup(
+                choices=["lora", "lycoris", "ckp"],
+                label="Model Types",
+                value=["lora", "lycoris"]
+            )
+        with gr.Row():
+            organize_by_author = gr.Checkbox(
+                label="Organize by Author",
+                value=True
+            )
+            organize_by_base_model = gr.Checkbox(
+                label="Organize by Base Model",
+                value=False
+            )
+            remove_empty_folders = gr.Checkbox(
+                label="Remove empty folders after organize",
+                value=True
+            )
+
+        with gr.Row():
+            organize_btn = gr.Button(
+                value="Organize Models",
+                variant="primary"
+            )
+
+        organize_log_md = gr.Markdown("")
+
+    # ====events====
+    organize_btn.click(
+        organize.organize,
+        inputs=[
+            organize_model_types,
+            organize_by_author,
+            organize_by_base_model,
+            remove_empty_folders
+        ],
+        outputs=organize_log_md
+    )
 
 def get_model_info_by_url_section():
     """ Get Civitai Model Info by Model Page URL Section """
