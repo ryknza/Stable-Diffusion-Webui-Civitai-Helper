@@ -59,7 +59,13 @@ script_dir = None
 # print for debugging
 def printD(msg:any) -> str:
     """ Print a message to stderr """
-    print(f"CHv{VERSION}: {msg}")
+    msg_str = str(msg)
+    lower_msg = msg_str.lower()
+    
+    # エラーや完了など、重要なメッセージのみを抽出するキーワード
+    keywords = ["error", "fail", "done", "exception", "warn", "can not", "cannot", "could not", "invalid", "missing"]
+    if any(k in lower_msg for k in keywords):
+        print(f"CHv{VERSION}: {msg}")
 
 
 def append_default_headers(headers:dict) -> dict:
@@ -211,14 +217,19 @@ def calculate_sha256(model_file, use_addnet_hash=False):
         model_file.seek(offset)
 
     pos = 0
+    last_tick = 0
+    start = time.time()
     for block in read_chunks(model_file, size=blocksize):
         pos += len(block)
 
-        percent = (pos - offset) / (size - offset)
-
-        yield (percent, f"hashing model {model_file.name}")
-
         sha256_hash.update(block)
+
+        timer = time.time()
+        if timer - last_tick > 0.2 or pos == size:
+            last_tick = timer
+            percent = (pos - offset) / max(size - offset, 1)
+            time.sleep(0.001)
+            yield (percent, f"hashing model {model_file.name}")
 
     hash_value =  sha256_hash.hexdigest()
     yield hash_value

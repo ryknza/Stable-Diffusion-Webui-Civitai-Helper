@@ -14,7 +14,7 @@ from . import util
 
 
 DL_EXT = ".downloading"
-MAX_RETRIES = 30
+MAX_RETRIES = 3
 
 # disable ssl warning info
 urllib3.disable_warnings()
@@ -171,7 +171,7 @@ def download_progress(
             # 416 - Range Not Satisfiable
 
             if dl_error.response.status_code != 416:
-                util.printD(f"An unhandled error has occurred while requesting data: {dl_error.response.status_cude}.")
+                util.printD(f"An unhandled error has occurred while requesting data: {dl_error.response.status_code}.")
                 raise
 
             util.printD("Could not resume download from existing temporary file. Restarting download.")

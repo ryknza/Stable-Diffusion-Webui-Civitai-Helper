@@ -97,8 +97,10 @@ def scan_single_model(filepath, model_type, refetch_old, organize_models, delay)
         model_info = civitai.get_model_info_by_hash(civitai_hash)
 
         if not model_info:
+            output = f"Missing on Civitai, creating dummy model info for: {filename}"
+            util.printD(output)
+            yield output
             model_info = dummy_model_info(filepath, civitai_hash, model_type)
-            yield True
 
         # if model is lora and not already in a subfolder, move into subfolder based on its type (character,
         # clothing, etc.)
@@ -148,7 +150,21 @@ def scan_model(scan_model_types, refetch_old, organize_models=False, progress=gr
             continue
 
         util.printD(f"Scanning path: {model_folder}")
-        for root, _, files in os.walk(model_folder, followlinks=True):
+        full_dirs_searched = []
+        for root, dirs, files in os.walk(model_folder, followlinks=True):
+            follow = []
+            for directory in dirs:
+                full_dir_path = os.path.join(root, directory)
+                try:
+                    canonical_dir = os.path.realpath(full_dir_path, strict=True)
+                    if canonical_dir not in full_dirs_searched:
+                        full_dirs_searched.append(canonical_dir)
+                        follow.append(directory)
+                except OSError:
+                    util.printD(f"Symlink loop: {directory}")
+                    continue
+            dirs[:] = follow
+
             for filename in files:
 
                 # check ext
@@ -194,12 +210,13 @@ def scan_model(scan_model_types, refetch_old, organize_models=False, progress=gr
         count[1] = count[1] + 1
 
         # check preview image
-        for _ in civitai.get_preview_image_by_model_path(
+        for result in civitai.get_preview_image_by_model_path(
             filepath,
             max_size_preview,
             nsfw_preview_threshold
         ):
-            pass
+            if isinstance(result, str):
+                progress(tracker, desc=result, unit="models")
 
     # this previously had an image count, but it always matched the model count.
     output = f"Done. Successfully scanned {count[1]} of {len(models)} models."
@@ -451,6 +468,7 @@ def get_model_info_by_id(model_id:str) -> dict:
             for filedata in version["files"]:
                 if filedata["type"] == "Model":
                     filename = filedata["name"]
+                    break
 
         except (ValueError, KeyError):
             pass
@@ -829,12 +847,13 @@ def dl_model_by_input(
 
     # get version info
     ver_info = get_ver_info_by_ver_str(version_str, model_info)
-    ver_info["model_id"] = model_info["id"]
     if not ver_info:
         output = "Failed to get version info, check console log for detail"
         util.printD(output)
         yield output
         return
+        
+    ver_info["model_id"] = model_info["id"]
 
     headers = {
         "content-type": "application/json"
