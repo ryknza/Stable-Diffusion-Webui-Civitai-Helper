@@ -9,6 +9,7 @@ import json
 import shutil
 import re
 from pathlib import Path
+import gradio as gr
 from . import util
 from . import model
 
@@ -50,14 +51,14 @@ def get_unique_stem(directory, stem, extension):
             return new_stem
         counter += 1
 
-def organize(model_types, organize_by_author=True, organize_by_base_model=False, remove_empty_folders=False):
+def organize(model_types, organize_by_author=True, organize_by_base_model=False, remove_empty_folders=False, progress=gr.Progress()):
     """
     Organize function called from WebUI
     """
     if not model_types:
         msg = "No model types selected."
         util.printD(msg)
-        yield msg
+        yield f"⚠️ {msg}"
         return
 
     # Get exclude filters from settings
@@ -70,8 +71,9 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=False,
     if excludes:
         msg = f"Exclude filters: {excludes}"
         util.printD(msg)
-        yield msg
     
+    final_results = []
+
     for model_type in model_types:
         if model_type not in model.folders:
             continue
@@ -82,7 +84,6 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=False,
 
         msg = f"--- Organizing {model_type}: {target_p} ---"
         util.printD(msg)
-        yield msg
 
         # Scan all model files in the directory
         count = 0
@@ -93,13 +94,17 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=False,
                 if file_path.suffix.lower() in model.EXTS:
                     model_files.append(file_path)
 
-        util.printD(f"Scanning {len(model_files)} files in {model_type}...")
-        yield f"🔍 Scanning {len(model_files)} files in {model_type}..."
+        total_files = len(model_files)
+        scan_msg = f"Scanning {total_files} files in {model_type}..."
+        util.printD(scan_msg)
+        progress((0, total_files), desc=scan_msg, unit="files")
 
         excluded_count = 0
         no_info_count = 0
         already_organized_count = 0
-        for file in model_files:
+        for i, file in enumerate(model_files):
+            progress((i, total_files), desc=f"Organizing {model_type}...", unit="files")
+
             if not file.exists():
                 continue
 
@@ -186,8 +191,8 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=False,
             new_stem = get_unique_stem(target_dir, desired_stem, file.suffix)
 
             if current_stem != new_stem:
-                util.printD(f"Rename: {current_stem} -> {new_stem}")
-                yield f"✏️ Rename: {current_stem} -> {new_stem}"
+                rename_msg = f"Rename: {current_stem} -> {new_stem}"
+                util.printD(rename_msg)
 
             # 4. Move related files together
             target_extensions = list(model.EXTS) + [".png", ".jpg", ".jpeg", ".preview.png", ".civitai.info", ".json", ".txt"]
@@ -203,13 +208,16 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=False,
             
             count += 1
             if count % 50 == 0:
-                util.printD(f"Organizing: {count} sets done...")
-                yield f"Organizing: {count} sets done..."
+                prog_msg = f"Organizing: {count} sets done..."
+                util.printD(prog_msg)
+
+        progress((total_files, total_files), desc=f"Finished organizing {model_type}", unit="files")
 
         # Delete empty folders
         if remove_empty_folders:
-            util.printD("Cleaning up empty folders...")
-            yield "🧹 Cleaning up empty folders..."
+            clean_msg = "Cleaning up empty folders..."
+            util.printD(clean_msg)
+            progress((total_files, total_files), desc=clean_msg, unit="files")
             for dirpath, _, _ in os.walk(str(target_p), topdown=False):
                 if os.path.abspath(dirpath) == os.path.abspath(str(target_p)): continue
                 try:
@@ -219,4 +227,6 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=False,
 
         result_msg = f"{model_type}: {count} organized. (Excluded: {excluded_count}, No Info: {no_info_count}, Already Organized: {already_organized_count})"
         util.printD(result_msg)
-        yield f"✨ {result_msg}"
+        final_results.append(f"✨ {result_msg}")
+
+    yield "<br>".join(final_results)
