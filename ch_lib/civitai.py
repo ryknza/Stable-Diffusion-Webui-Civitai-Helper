@@ -432,9 +432,16 @@ def verify_preview(path, img_dict, max_size_preview, nsfw_preview_threshold):
 
     img_url = get_image_url(img_dict, max_size_preview)
 
+    headers = {
+        "content-type": "application/json"
+    }
+    api_key = util.get_opts("ch_civiai_api_key")
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+
     success = False
     preview_path = ""
-    for result in downloader.dl_file(img_url, file_path=path):
+    for result in downloader.dl_file(img_url, file_path=path, headers=headers):
         if not isinstance(result, str):
             success, preview_path = result
             break
@@ -495,7 +502,14 @@ def get_preview_image_by_model_path(model_path: str, max_size_preview, nsfw_prev
                 img_url = get_image_url(img_dict, max_size_preview)
                 break
 
-        for result in downloader.dl_file(img_url, file_path=preview_path):
+        headers = {
+            "content-type": "application/json"
+        }
+        api_key = util.get_opts("ch_civiai_api_key")
+        if api_key:
+            headers["Authorization"] = f"Bearer {api_key}"
+
+        for result in downloader.dl_file(img_url, file_path=preview_path, headers=headers):
             if isinstance(result, str):
                 yield result
                 continue
