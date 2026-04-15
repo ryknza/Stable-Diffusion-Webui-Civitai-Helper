@@ -23,7 +23,7 @@ MODEL_TYPES = {
     "TextualInversion": "ti",
     "Hypernetwork": "hyper",
     "LORA": "lora",
-    "LoCon": "lycoris",
+    "LoCon": "lora",
     "DoRA": "lora",
     "VAE": "vae"
 }
@@ -251,10 +251,7 @@ def load_model_info_by_search_term(model_type, search_term):
     if base[:1] == "/":
         model_info_base = base[1:]
 
-    if model_type == "lora" and model.folders['lycoris']:
-        model_folders = [model.folders[model_type], model.folders['lycoris']]
-    else:
-        model_folders = [model.folders[model_type]]
+    model_folders = [model.folders[model_type]]
 
     for model_folder in model_folders:
         model_info_filename = f"{model_info_base}{SUFFIX}{model.CIVITAI_EXT}"
@@ -280,10 +277,7 @@ def get_model_names_by_type_and_filter(model_type: str, metadata_filter: dict) -
     return: model name list
     """
 
-    if model_type == "lora" and model.folders['lycoris']:
-        model_folders = [model.folders[model_type], model.folders['lycoris']]
-    else:
-        model_folders = [model.folders[model_type]]
+    model_folders = [model.folders[model_type]]
 
     # set metadata_filter
     # only get models don't have a civitai info file

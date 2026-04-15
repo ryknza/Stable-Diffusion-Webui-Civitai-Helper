@@ -82,9 +82,9 @@ def organize_models_section():
         gr.Markdown("Moves models into subfolders named after their creator (requires .civitai.info).")
         with gr.Row():
             organize_model_types = gr.CheckboxGroup(
-                choices=["lora", "lycoris", "ckp"],
+                choices=["lora", "ckp"],
                 label="Model Types",
-                value=["lora", "lycoris"]
+                value=["lora"]
             )
         with gr.Row():
             organize_by_author = gr.Checkbox(
@@ -1091,7 +1091,7 @@ def check_new_versions_section(js_msg_txtbox):
                     choices=model_types,
                     label="Model Types",
                     value=[
-                        "ti", "hyper", "ckp", "lora", "lycoris"
+                        "ti", "hyper", "ckp", "lora"
                     ]
                 )
         with gr.Row():

@@ -178,9 +178,8 @@ def get_hash(model_path, model_file, model_type, cached_hash):
         "ckp": "checkpoint",
         "ti": "textual_inversion",
         "hyper": "hypernet",
-        "lora": "lora",
-        "lycoris": "lycoris"
-    }[model_type]
+        "lora": "lora"
+    }.get(model_type, model_type)
 
     result = None
     for result in util.gen_file_sha256(
@@ -229,10 +228,6 @@ def check_for_dups(models):
         scanned_type = scanned[model_type]
         for model_data in models_of_type:
             sha256 = model_data["hash"]
-
-            if model_type == "lycoris":
-                if is_lycoris_lora(model_data, scanned):
-                    continue
 
             if not scanned_type.get(sha256, None):
                 scanned_type[sha256] = [model_data]
@@ -351,28 +346,3 @@ def create_dups_html(dups):
         return "Found no duplicate models!"
 
     return "".join(articles)
-
-
-def is_lycoris_lora(lyco, models):
-    """
-        Compares a lycoris model to scanned loras to ensure that they're not the same file.
-    """
-    loras = None
-    try:
-        loras = models["lora"][lyco["hash"]]
-
-    except (KeyError, ValueError):
-        return False
-
-    try:
-        lyco_path = os.path.realpath(lyco["model_path"], strict=True)
-
-        for lora in loras:
-            lora_path = os.path.realpath(lora["model_path"], strict=True)
-            if lyco_path == lora_path:
-                return True
-
-    except OSError:
-        return False
-
-    return False

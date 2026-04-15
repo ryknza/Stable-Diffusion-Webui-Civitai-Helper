@@ -34,7 +34,6 @@ folders = {
     "hyper": os.path.join(ROOT_PATH, "models", "hypernetworks"),
     "ckp": os.path.join(ROOT_PATH, "models", "Stable-diffusion"),
     "lora": os.path.join(ROOT_PATH, "models", "Lora"),
-    "lycoris": os.path.join(ROOT_PATH, "models", "LyCORIS"),
     "vae": os.path.join(ROOT_PATH, "models", "VAE"),
     # ---
     "controlnet": os.path.join(ROOT_PATH, "models", "Controlnet"),
@@ -116,26 +115,6 @@ def get_custom_model_folder():
 
     if hasattr(shared.cmd_opts, "vae_dir") and shared.cmd_opts.vae_dir and os.path.isdir(shared.cmd_opts.vae_dir):
         folders["vae"] = shared.cmd_opts.vae_dir
-
-    if util.get_opts("ch_dl_lyco_to_lora"):
-        folders["lycoris"] = folders["lora"]
-        return
-
-    try:
-        # pre-1.5.0
-        if os.path.isdir(shared.cmd_opts.lyco_dir):
-            folders["lycoris"] = shared.cmd_opts.lyco_dir
-
-    except AttributeError:
-        try:
-            # sd-webui v1.5.1 added a backcompat option for lyco.
-            if os.path.isdir(shared.cmd_opts.lyco_dir_backcompat):
-                folders["lycoris"] = shared.cmd_opts.lyco_dir_backcompat
-
-        except AttributeError:
-            # v1.5.0 has no options for the Lyco dir:
-            # it is hardcoded as 'os.path.join(paths.models_path, "LyCORIS")'
-            return
 
 
 def locate_model_from_partial(root, model_name):
@@ -421,7 +400,7 @@ def process_sd15_info(sd15_file, model_info, parent, model_type, refetch_old):
     # Sadly, Civitai does not provide default weight information,
     # So 0 disables this functionality on webui's end and uses
     # the user's global setting
-    if model_type in ["lora", "lycoris"]:
+    if model_type == "lora":
         sd_data["preferred weight"] = 0
 
     sd_data["extensions"] = util.create_extension_block(
@@ -494,10 +473,7 @@ def get_model_names_by_type(model_type:str) -> list:
     return: model name list
     """
 
-    if model_type == "lora" and folders['lycoris']:
-        model_folders = [folders[model_type], folders['lycoris']]
-    else:
-        model_folders = [folders[model_type]]
+    model_folders = [folders[model_type]]
 
     # get information from filter
     # only get those model names don't have a civitai model info file
@@ -528,9 +504,6 @@ def get_model_path_by_type_and_name(model_type:str, model_name:str) -> str:
     if model_folders[0] is None:
         util.printD(f"unknown model_type: {model_type}")
         return None
-
-    if model_type == "lora" and folders['lycoris']:
-        model_folders.append(folders['lycoris'])
 
     # model could be in subfolder, need to walk.
     model_path = util.find_file_in_folders(model_folders, model_name)
@@ -577,10 +550,7 @@ def get_model_path_by_search_term(model_type, search_term):
     if model_sub_path[:1] == "/":
         model_sub_path = model_sub_path[1:]
 
-    if model_type == "lora" and folders['lycoris']:
-        model_folders = [folders[model_type], folders['lycoris']]
-    else:
-        model_folders = [folders[model_type]]
+    model_folders = [folders[model_type]]
 
     for folder in model_folders:
         model_folder = folder
