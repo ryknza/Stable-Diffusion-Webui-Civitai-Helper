@@ -360,6 +360,15 @@ def on_ui_settings():
             section=section
         )
     )
+    shared.opts.add_option(
+        "ch_verbose_log",
+        shared.OptionInfo(
+            False,
+            "Print verbose logs in console (Civitai Helper)",
+            gr.Checkbox,
+            {"interactive": True},
+            section=section)
+    )
     if dynamic_args:
         shared.opts.add_option(
             "ch_image_metadata",
