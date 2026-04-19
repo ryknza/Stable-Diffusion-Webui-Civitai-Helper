@@ -61,12 +61,12 @@ def printD(msg:any) -> str:
     """ Print a message to stderr """
     msg_str = str(msg)
     lower_msg = msg_str.lower()
-    
-    # エラーや完了など、重要なメッセージのみを抽出するキーワード
-    keywords = ["error", "fail", "done", "exception", "warn", "can not", "cannot", "could not", "invalid", "missing", "organize", "organizing", "organized", "rename", "scanning", "clean"]
 
-    if get_opts("ch_verbose_log"):
-        keywords.extend(["metadata not needed", "checking preview"])
+    # Keywords to extract only important messages such as errors and completions.
+    keywords = ["error", "fail", "failed", "exception", "warn", "can not", "cannot", "could not", "invalid", "missing", 
+                "done", "success", "successfully", "completed", "finished", 
+                "start", "scanning", "creating", "requesting", "Download", 
+                "rename", "moving"]
 
     if any(k in lower_msg for k in keywords):
         print(f"CHv{VERSION}: {msg}")
