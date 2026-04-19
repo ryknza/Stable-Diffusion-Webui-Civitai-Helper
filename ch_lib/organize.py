@@ -51,7 +51,7 @@ def get_unique_stem(directory, stem, extension):
             return new_stem
         counter += 1
 
-def organize(model_types, organize_by_author=True, organize_by_base_model=False, remove_empty_folders=False, progress=gr.Progress()):
+def organize(model_types, organize_by_author=True, organize_by_base_model=True, remove_empty_folders=False, progress=gr.Progress()):
     """
     Organize function called from WebUI
     """

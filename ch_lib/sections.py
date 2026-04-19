@@ -93,7 +93,7 @@ def organize_models_section():
             )
             organize_by_base_model = gr.Checkbox(
                 label="Organize by Base Model",
-                value=False
+                value=True
             )
             remove_empty_folders = gr.Checkbox(
                 label="Remove empty folders after organize",
