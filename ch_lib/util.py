@@ -59,17 +59,7 @@ script_dir = None
 # print for debugging
 def printD(msg:any) -> str:
     """ Print a message to stderr """
-    msg_str = str(msg)
-    lower_msg = msg_str.lower()
-
-    # Keywords to extract only important messages such as errors and completions.
-    keywords = ["error", "fail", "failed", "exception", "warn", "can not", "cannot", "could not", "invalid", "missing", 
-                "done", "success", "successfully", "completed", "finished", 
-                "start", "scanning", "creating", "requesting", "Download", 
-                "rename", "moving"]
-
-    if any(k in lower_msg for k in keywords):
-        print(f"CHv{VERSION}: {msg}")
+    print(f"CHv{VERSION}: {msg}")
 
 
 def append_default_headers(headers:dict) -> dict:
