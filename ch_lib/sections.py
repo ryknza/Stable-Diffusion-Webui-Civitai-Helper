@@ -206,11 +206,11 @@ def filter_previews(previews):
             nsfw_level = preview["nsfwLevel"]
         except KeyError:
             util.printD("NSFW status of preview image could not be determined. :(")
-            if nsfw_preview_threshold != civitai.NSFW_LEVELS["XXX"]:
+            if civitai.NSFW_LEVELS.get(nsfw_preview_threshold, 1) < civitai.NSFW_LEVELS["XXX"]:
                 continue
             nsfw_level = 0
 
-        if civitai.NSFW_LEVELS[nsfw_preview_threshold] < nsfw_level:
+        if civitai.NSFW_LEVELS.get(nsfw_preview_threshold, 1) < nsfw_level:
             continue
         if preview["type"] == "image":
             # Civitai added videos as previews, and webui does not like it
@@ -872,10 +872,15 @@ def download_multiple_section():
             if not model_info:
                 continue
 
+            model_type = civitai.MODEL_TYPES.get(model_info.get("type"))
+            if not model_type:
+                util.printD(f"Unsupported model type: {model_info.get('type')}. Skipping {model_info.get('name')}")
+                continue
+
             dl = {
                 "model_name": model_info["name"],
                 "model_info": model_info,
-                "model_type": civitai.MODEL_TYPES[model_info["type"]],
+                "model_type": model_type,
                 "subfolder": f"/{options['subdirectory'] or ''}",
                 "version_str": None,
                 "filename": None,
