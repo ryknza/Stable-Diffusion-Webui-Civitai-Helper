@@ -45,7 +45,6 @@ def open_model_url(msg):
 
     domain = "civitai.red" if civitai.is_model_nsfw(model_info) else "civitai.com"
     url = f'https://{domain}/models/{model_id}'
-    util.printD(f"Open Url: {url}")
 
     # msg content for js
     content = {
@@ -57,7 +56,7 @@ def open_model_url(msg):
         # open url
         webbrowser.open_new_tab(url)
     else:
-        util.printD("Send Url to js")
+        util.printD(f"Send Url to js: {url}")
         content["url"] = url
         output = msg_handler.build_py_msg("open_url", content)
 
