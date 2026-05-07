@@ -43,7 +43,9 @@ def open_model_url(msg):
         util.printD(f"model id from info file of {model_type} {search_term} is None")
         return ""
 
-    url = f'{civitai.URLS["modelPage"]}{model_id}'
+    domain = "civitai.red" if civitai.is_model_nsfw(model_info) else "civitai.com"
+    url = f'https://{domain}/models/{model_id}'
+    util.printD(f"Open Url: {url}")
 
     # msg content for js
     content = {

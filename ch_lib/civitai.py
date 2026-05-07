@@ -61,6 +61,23 @@ NSFW_LEVELS = {
 }
 
 
+def is_model_nsfw(model_info: dict) -> bool:
+    """
+    モデルのメタデータからNSFWかどうかを判定します
+    """
+    if not model_info:
+        return False
+
+    if model_info.get("nsfw", False):
+        return True
+
+    if model_info.get("nsfwLevel", 1) > 1:
+        return True
+
+    tags = model_info.get("tags", [])
+    return "nsfw" in [str(tag).lower() for tag in tags]
+
+
 def civitai_get(civitai_url: str):
     """
     Gets JSON from Civitai.
