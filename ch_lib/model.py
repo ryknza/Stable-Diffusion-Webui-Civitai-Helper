@@ -31,14 +31,9 @@ folder also need to be in absolute path
 """
 folders = {
     "ti": os.path.join(ROOT_PATH, "embeddings"),
-    "hyper": os.path.join(ROOT_PATH, "models", "hypernetworks"),
     "ckp": os.path.join(ROOT_PATH, "models", "Stable-diffusion"),
     "lora": os.path.join(ROOT_PATH, "models", "Lora"),
     "vae": os.path.join(ROOT_PATH, "models", "VAE"),
-    # ---
-    "controlnet": os.path.join(ROOT_PATH, "models", "Controlnet"),
-    "detection": os.path.join(ROOT_PATH, "models", "adetailer"),
-    # ---
 }
 
 
@@ -103,9 +98,6 @@ def get_custom_model_folder():
 
     if hasattr(shared.cmd_opts, "embeddings_dir") and shared.cmd_opts.embeddings_dir and os.path.isdir(shared.cmd_opts.embeddings_dir):
         folders["ti"] = shared.cmd_opts.embeddings_dir
-
-    if hasattr(shared.cmd_opts, "hypernetwork_dir") and shared.cmd_opts.hypernetwork_dir and os.path.isdir(shared.cmd_opts.hypernetwork_dir):
-        folders["hyper"] = shared.cmd_opts.hypernetwork_dir
 
     if hasattr(shared.cmd_opts, "ckpt_dir") and shared.cmd_opts.ckpt_dir and os.path.isdir(shared.cmd_opts.ckpt_dir):
         folders["ckp"] = shared.cmd_opts.ckpt_dir
@@ -536,16 +528,12 @@ def get_model_path_by_search_term(model_type, search_term):
     #   And it always start with a / even there is no sub folder
     # for ckp: search_term = subfolderpath + model name + ext + " " + hash
     # for ti: search_term = subfolderpath + model name + ext + " " + hash
-    # for hyper: search_term = subfolderpath + model name
 
     # this used to be
     # `model_sub_path = search_term.split()[0]`
     # but it was failing on models containing spaces.
     model_hash = search_term.split()[-1]
     model_sub_path = search_term.replace(f" {model_hash}", "")
-
-    if model_type == "hyper":
-        model_sub_path = f"{search_term}.pt"
 
     if model_sub_path[:1] == "/":
         model_sub_path = model_sub_path[1:]

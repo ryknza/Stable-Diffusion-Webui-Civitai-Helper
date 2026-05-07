@@ -1091,7 +1091,7 @@ def check_new_versions_section(js_msg_txtbox):
                     choices=model_types,
                     label="Model Types",
                     value=[
-                        "ti", "hyper", "ckp", "lora"
+                        "ti", "ckp", "lora"
                     ]
                 )
         with gr.Row():

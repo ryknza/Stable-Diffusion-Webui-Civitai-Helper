@@ -177,7 +177,6 @@ def get_hash(model_path, model_file, model_type, cached_hash):
     model_hash_type = {
         "ckp": "checkpoint",
         "ti": "textual_inversion",
-        "hyper": "hypernet",
         "lora": "lora"
     }.get(model_type, model_type)
 
@@ -203,12 +202,6 @@ def make_search_term(model_type, model_path, sha256):
 
     if not subpath.startswith("/"):
         subpath = f"/{subpath}"
-
-    if model_type == "hyper":
-        snippet = subpath.split(".")
-        snippet.pop()
-        subpath = ".".join(snippet)
-        return f"{subpath}"
 
     # All other supported model types seem to use this format
     return f"{subpath} {sha256}"
