@@ -28,24 +28,6 @@ MODEL_TYPES = {
     "VAE": "vae"
 }
 
-MODEL_CATEGORIES = {
-    "character",
-    "style",
-    "celebrity",
-    "concept",
-    "clothing",
-    "base model",
-    "poses",
-    "background",
-    "tool",
-    "buildings",
-    "vehicle",
-    "objects",
-    "animal",
-    "action",
-    "assets"
-}
-
 FILE_TYPES = [
     "Model", "Config", "VAE" # , "Training Data"
 ]
@@ -780,51 +762,3 @@ def check_models_new_version_by_model_types(model_types: list, delay: float = 0.
                 new_version_ids.append(version_id)
 
     return new_versions
-
-
-def move_model_to_subfolder(filepath, model_info):
-    model_id = model_info["modelId"]
-
-    if model_id == "":
-        return None
-
-    content = civitai_get(f'{URLS["modelId"]}{model_id}')
-
-    tags = content["tags"]
-
-    # iterate through tags until we find one that matches MODEL_CATEGORIES
-
-    for tag in tags:
-        if tag in MODEL_CATEGORIES:
-            model_category = tag
-
-            # create subfolder if it doesn't exist
-            # check to make sure the model is not already in the correct subfolder
-            if model_category in filepath:
-                return filepath
-
-            # get the file path without the filename
-            folderpath = os.path.dirname(filepath)
-
-            # create the new folder path
-            new_folder_path = os.path.join(folderpath, model_category)
-
-            # create the new folder if it doesn't exist
-            if not os.path.isdir(new_folder_path):
-                if not os.path.exists(new_folder_path):
-                    os.makedirs(new_folder_path)
-                else:
-                    console.log(f"`{new_folder_path}` is not a directory. Skipping. Please delete or move the file `{new_folder_path}`.")
-                    break
-
-            util.printD(f"Moving model from {filepath} to {new_folder_path}")
-
-            # move the file to the new folder
-            new_filepath = os.path.join(new_folder_path, os.path.basename(filepath))
-            os.rename(filepath, new_filepath)
-
-            return new_filepath
-
-    util.printD("WARNING: Unable to find tag for folder")
-
-    return filepath

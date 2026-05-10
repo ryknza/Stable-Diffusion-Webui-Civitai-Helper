@@ -26,11 +26,6 @@ def scan_models_section():
             )
     with gr.Row():
         with gr.Column():
-            organize_models = gr.Checkbox(
-                label="Move models into category folders",
-                value=False,
-                elem_id="organize_models"
-            )
             refetch_old_ckb = gr.Checkbox(
                 label="Replace Old Metadata Formats*",
                 value=False,
@@ -64,8 +59,7 @@ def scan_models_section():
         model_action_civitai.scan_model,
         inputs=[
             scan_model_types_drop,
-            refetch_old_ckb,
-            organize_models
+            refetch_old_ckb
         ],
         outputs=scan_model_log_md
     )
@@ -79,7 +73,7 @@ def organize_models_section():
     """ Organize Models Section """
     with gr.Column():
         gr.Markdown("### Organize Models")
-        gr.Markdown("Moves models into subfolders named after their creator (requires .civitai.info).")
+        gr.Markdown("Moves models into subfolders based on their creator, base model, or category (requires .civitai.info).")
         with gr.Row():
             organize_model_types = gr.CheckboxGroup(
                 choices=["lora", "ckp"],
@@ -94,6 +88,11 @@ def organize_models_section():
             organize_by_base_model = gr.Checkbox(
                 label="Organize by Base Model",
                 value=True
+            )
+            organize_by_category = gr.Checkbox(
+                label="Organize by Category (from tags)",
+                value=False,
+                elem_id="organize_by_category"
             )
             remove_empty_folders = gr.Checkbox(
                 label="Remove empty folders after organize",
@@ -115,6 +114,7 @@ def organize_models_section():
             organize_model_types,
             organize_by_author,
             organize_by_base_model,
+            organize_by_category,
             remove_empty_folders
         ],
         outputs=organize_log_md
