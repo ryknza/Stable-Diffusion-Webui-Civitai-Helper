@@ -13,6 +13,24 @@ import gradio as gr
 from . import util
 from . import model
 
+MODEL_CATEGORIES = {
+    "character",
+    "style",
+    "celebrity",
+    "concept",
+    "clothing",
+    "base model",
+    "poses",
+    "background",
+    "tool",
+    "buildings",
+    "vehicle",
+    "objects",
+    "animal",
+    "action",
+    "assets"
+}
+
 BASE_MODEL_MAPPING = {
     "SD 1.5": "SD15",
     "SD 1.4": "SD14",
@@ -51,7 +69,7 @@ def get_unique_stem(directory, stem, extension):
             return new_stem
         counter += 1
 
-def organize(model_types, organize_by_author=True, organize_by_base_model=True, remove_empty_folders=False, progress=gr.Progress()):
+def organize(model_types, organize_by_author=True, organize_by_base_model=True, organize_by_category=False, remove_empty_folders=False, progress=gr.Progress()):
     """
     Organize function called from WebUI
     """
@@ -102,6 +120,7 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
         excluded_count = 0
         no_info_count = 0
         already_organized_count = 0
+        path_too_long_count = 0
         for i, file in enumerate(model_files):
             progress((i, total_files), desc=f"Organizing {model_type}...", unit="files")
 
@@ -134,6 +153,7 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
 
             creator = "Unknown_Author"
             base_model = None
+            category = None
             
             current_stem = file.stem
             desired_stem = current_stem
@@ -156,6 +176,15 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
                     else:
                         base_model = "Unknown_Base_Model"
                 
+                # Get category if enabled
+                if organize_by_category:
+                    tags = data.get("tags", [])
+                    for tag in tags:
+                        tag_name = tag if isinstance(tag, str) else tag.get("name", "")
+                        if tag_name in MODEL_CATEGORIES:
+                            category = sanitize_filename(tag_name)
+                            break
+
                 # Use filename information from .civitai.info
                 files_info = data.get("files", [])
                 if isinstance(files_info, list) and files_info:
@@ -169,10 +198,21 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
                 continue
 
             # 2. Determine destination folder and skip processed files
+            # Folder hierarchy examples based on selected options:
+            # - All ON:                [target_dir] / [Base Model] / [Category] / [Author]
+            # - Base Model + Category: [target_dir] / [Base Model] / [Category]
+            # - Base Model + Author:   [target_dir] / [Base Model] / [Author]
+            # - Category + Author:     [target_dir] / [Category] / [Author]
+            # - Only Author:           [target_dir] / [Author]
+            # - Only Category:         [target_dir] / [Category]
+            # - Only Base Model:       [target_dir] / [Base Model]
             target_dir = target_p
 
             if organize_by_base_model and base_model:
                 target_dir = target_dir / base_model
+
+            if organize_by_category and category:
+                target_dir = target_dir / category
 
             if organize_by_author:
                 target_dir = target_dir / creator
@@ -196,6 +236,20 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
 
             # 4. Move related files together
             target_extensions = list(model.EXTS) + [".png", ".jpg", ".jpeg", ".preview.png", ".civitai.info", ".json", ".txt"]
+
+            # Pre-check path length for Windows (MAX_PATH = 260)
+            if os.name == 'nt':
+                path_too_long = False
+                for ext in target_extensions:
+                    if (file.parent / (current_stem + ext)).exists():
+                        if len(str((target_dir / (new_stem + ext)).absolute())) >= 260:
+                            path_too_long = True
+                            break
+                if path_too_long:
+                    util.printD(f"Move skipped (Path too long): {target_dir / new_stem}")
+                    path_too_long_count += 1
+                    continue
+
             for ext in target_extensions:
                 src_file = file.parent / (current_stem + ext)
                 
@@ -225,7 +279,10 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
                         os.rmdir(dirpath)
                 except: pass
 
-        result_msg = f"{model_type}: {count} organized. (Excluded: {excluded_count}, No Info: {no_info_count}, Already Organized: {already_organized_count})"
+        result_msg = f"{model_type}: {count} organized. (Excluded: {excluded_count}, No Info: {no_info_count}, Already Organized: {already_organized_count}"
+        if path_too_long_count > 0:
+            result_msg += f", Path too long: {path_too_long_count}"
+        result_msg += ")"
         util.printD(result_msg)
         final_results.append(f"✨ {result_msg}")
 
