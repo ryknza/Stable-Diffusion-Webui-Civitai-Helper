@@ -221,11 +221,16 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
 
             # If already in the correct folder
             if file.parent == target_dir:
-                # Skip if name matches exactly or matches "original_name_number"
-                # (Prevent infinite renaming like _1 to _2, _3...)
-                if current_stem == desired_stem or re.match(rf"^{re.escape(desired_stem)}_\d+$", current_stem):
+                if current_stem == desired_stem:
                     already_organized_count += 1
                     continue
+                
+                # If it's a numbered file (e.g. name_1), check if the base name is free.
+                if re.match(rf"^{re.escape(desired_stem)}_\d+$", current_stem):
+                    # If base name is already taken, keep the current numbered name to prevent infinite renaming.
+                    if (target_dir / f"{desired_stem}{file.suffix}").exists():
+                        already_organized_count += 1
+                        continue
 
             # 3. Determine name to avoid duplicates (Rename per set)
             new_stem = get_unique_stem(target_dir, desired_stem, file.suffix)
