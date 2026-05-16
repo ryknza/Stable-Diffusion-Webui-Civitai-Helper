@@ -1,5 +1,8 @@
 ### I would like to retire from maintaining this project. As much as I've enjoyed working on this, I have lost interest as of late and no longer use Stable Diffusion WebUI. If anyone would like to take over, please feel free to fork this project.
 
+> **Note:** The message above is from the upstream maintainer.  
+> This repository is a personal fork, customized and maintained strictly for personal use.
+
 **[Contributors](https://github.com/zixaphir/Stable-Diffusion-Webui-Civitai-Helper/graphs/contributors)**
 
 ### Language
@@ -53,7 +56,7 @@ Done.
 
 ## Branches
 Development of this extension happens in three development branches:
-* **`master`**: The current version of the extension intended for end users. Out-of-version changes to this branch only exist to hotfix critical issues found after the release of a new version.
+* **`main`**: The current version of the extension intended for end users. Out-of-version changes to this branch only exist to hotfix critical issues found after the release of a new version.
 * **`dev`**: The active development version of this extension. This will always have the most up-to-date changes but is also the most likely to contain bugs.
 * **`v1.6ONLY`**: Not supported and not really intended for anybody except for me. Slowest to update and less tested than other branches, this branch only runs on the latest version of webui. Compatibility code for older versions is actively removed, and whether I'm running it on webui stable or webui dev is in flux. In theory, this is the most optimized version of the extension, but it's often just me chasing waterfalls. Do not submit issues if you use this branch. They will be marked as invalid, closed, and otherwise ignored.
 * **`Feature Branches`**: These are branches separated from the main development branches to add new features. They are likely to be in a state of active development and incomplete.
@@ -275,4 +278,4 @@ Since v1.5.5, we've already optimized the SHA256 function to the top. So the onl
 * try again
 * or use a pro account of colab.
 
-### [Changes](https://github.com/zixaphir/Stable-Diffusion-Webui-Civitai-Helper/blob/master/CHANGELOG.md)
+### [Changes](CHANGELOG.md)
