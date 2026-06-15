@@ -39,8 +39,8 @@ BASE_MODEL_MAPPING = {
     "SDXL 1.0": "SDXL",
     "SDXL 0.9": "SDXL",
     "Pony Diffusion V6 XL": "Pony",
-    "Illustrious": "Illu",
-    "NoobAI": "Noob",
+    "Illustrious": "Illustrious",
+    "NoobAI": "NoobAI",
     "Wan Video 2.2 I2V-A14B": "WanVideo22",
     "Anima": "Anima",
     "Flux.1 S": "Flux1",
@@ -211,10 +211,10 @@ def organize(model_types, organize_by_author=True, organize_by_base_model=True, 
             if organize_by_base_model and base_model:
                 target_dir = target_dir / base_model
 
-            if organize_by_category and category:
+            if organize_by_category and category and model_type != "ckp":
                 target_dir = target_dir / category
 
-            if organize_by_author:
+            if organize_by_author and model_type != "ckp":
                 target_dir = target_dir / creator
 
             target_dir.mkdir(parents=True, exist_ok=True)
